@@ -5,6 +5,10 @@
   "logLevel": "debug",
   "logDisableRedaction": "true",
   "envName": "dev",
+<<<<<<< HEAD
   "stackName": "home-meal-server",
+=======
+  "stackName": "gymtrue-server",
+>>>>>>> e9cd1e1 (Add backend api)
   "region": "ap-southeast-2"
 }
