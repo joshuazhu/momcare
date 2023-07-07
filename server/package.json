@@ -1,12 +1,12 @@
 {
-  "name": "home-meal-server",
+  "name": "momcare-server",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
     "compile": "tsc",
     "start": "yarn run compile && node ./dist/index.js",
-    "deploy:dev": "cdk deploy home-meal-server-dev --progress events --log --require-approval \"never\""
+    "deploy:dev": "cdk deploy momcare-server-dev --progress events --log --require-approval \"never\""
   },
   "devDependencies": {
     "@types/node": "^18.11.0",

@@ -5,6 +5,6 @@
   "logLevel": "debug",
   "logDisableRedaction": "true",
   "envName": "dev",
-  "stackName": "home-meal-server",
+  "stackName": "momcare-server",
   "region": "ap-southeast-2"
 }

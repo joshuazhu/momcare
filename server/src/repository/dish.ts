@@ -12,7 +12,7 @@ export const DishSchema = z.object({
 export type DishType = z.infer<typeof DishSchema>;
 
 export const getAllDishes =  async (): Promise<DishType[]> => {
-    const data = await getAll('home-meal-server-dev-dish')
+    const data = await getAll('momcare-server-dev-dish')
     const dishes = z.array(DishSchema).parse(data);
     console.log('!!dishes', dishes)
     return dishes
