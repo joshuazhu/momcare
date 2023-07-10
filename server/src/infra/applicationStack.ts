@@ -8,7 +8,7 @@ import {
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import path from "path";
-import { ApplicationProperties } from "./types";
+import { ApplicationProperties } from "src/infra/types";
 
 const buildEnv = () => ({
   NODE_OPTIONS: "--enable-source-maps",
@@ -28,7 +28,7 @@ export class ApplicationStack extends Stack {
     const lambda = this.createLambda({
       scope: this,
       lambdaName: `graphql`,
-      sourcePath: "../src/index.ts",
+      sourcePath: "../index.ts",
       props,
     });
 

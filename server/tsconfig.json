@@ -28,7 +28,7 @@
     "skipLibCheck": true,
     "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["src/**/*", "infra/**/*", "test/*"],
+  "include": ["src/**/*", "src/infra/**/*", "test/*"],
   "exclude": ["node_modules/", "cdk.out"],
   "ts-node": {
     "esm": true
