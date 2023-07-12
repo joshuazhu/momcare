@@ -25,6 +25,15 @@ export class ApplicationStack extends Stack {
       writeCapacity: 5, 
     })
 
+    table.addGlobalSecondaryIndex({
+      indexName: 'categoryIndex',
+      partitionKey: {name: 'category', type: aws_dynamodb.AttributeType.STRING},
+      sortKey: {name: 'title', type: aws_dynamodb.AttributeType.STRING},
+      readCapacity: 5,
+      writeCapacity: 5,
+      projectionType: aws_dynamodb.ProjectionType.ALL
+    })
+
     const lambda = this.createLambda({
       scope: this,
       lambdaName: `graphql`,

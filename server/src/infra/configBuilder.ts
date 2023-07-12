@@ -1,6 +1,6 @@
 import { ApplicationProperties } from "./types";
 
-const configEsBuild = require("../../config/configEsBuild.json");
+const configEsBuild = require("../config/configEsBuild.json");
 const config = require("../config/config.json");
 
 export const build = (): ApplicationProperties => {
