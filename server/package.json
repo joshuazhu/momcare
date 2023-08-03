@@ -4,8 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "compile": "tsc",
-    "start:local": "yarn compile && yarn run cdk synth && sam local start-api -t ./cdk.out/momcare-server-dev.template.json --profile=josh-zhu",
+    "compile": "yarn clean && ts-node --files src/esbuild.ts && yarn run cdk synth",
+    "clean": "rimraf cdk.out sam/build",
+    "start:local": "yarn compile && sam local start-api -t ./cdk.out/momcare-server-dev.template.json --profile=josh-zhu",
     "deploy:dev": "yarn compile && cdk deploy momcare-server-dev --progress events --log --require-approval \"never\""
   },
   "devDependencies": {
@@ -19,12 +20,14 @@
   "dependencies": {
     "@apollo/server": "^4.0.0",
     "@aws-sdk/client-dynamodb": "^3.338.0",
+    "@aws-sdk/lib-dynamodb": "^3.370.0",
     "@aws-sdk/util-dynamodb": "^3.369.0",
     "@effect/io": "^0.32.1",
     "apollo-server-lambda": "^3.10.3",
     "aws-cdk-lib": "^2.46.0",
     "aws-sdk": "^2.1233.0",
     "graphql": "^16.6.0",
+    "rimraf": "^5.0.1",
     "zod": "^3.19.1"
   }
 }

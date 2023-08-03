@@ -3,7 +3,7 @@ import {
   Stack,
   aws_lambda as lambda,
   StackProps,
-  aws_dynamodb
+  aws_dynamodb,
 } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
@@ -18,22 +18,6 @@ export class ApplicationStack extends Stack {
   constructor(scope: App, props: ApplicationProperties) {
     super(scope, `${props.stackName}`, props);
 
-    const table = new aws_dynamodb.Table(this, `${props.stackName}-dish`, {
-      tableName: `${props.stackName}-dish`,
-      partitionKey: { name: 'title', type: aws_dynamodb.AttributeType.STRING },
-      readCapacity: 5, 
-      writeCapacity: 5, 
-    })
-
-    table.addGlobalSecondaryIndex({
-      indexName: 'categoryIndex',
-      partitionKey: {name: 'category', type: aws_dynamodb.AttributeType.STRING},
-      sortKey: {name: 'title', type: aws_dynamodb.AttributeType.STRING},
-      readCapacity: 5,
-      writeCapacity: 5,
-      projectionType: aws_dynamodb.ProjectionType.ALL
-    })
-
     const lambda = this.createLambda({
       scope: this,
       lambdaName: `graphql`,
@@ -41,7 +25,48 @@ export class ApplicationStack extends Stack {
       props,
     });
 
-    table.grantFullAccess(lambda)
+    const dishTable = new aws_dynamodb.Table(this, `${props.stackName}-dish`, {
+      tableName: `${props.stackName}-dish`,
+      partitionKey: { name: "title", type: aws_dynamodb.AttributeType.STRING },
+      readCapacity: 5,
+      writeCapacity: 5,
+    });
+
+    dishTable.addGlobalSecondaryIndex({
+      indexName: "categoryIndex",
+      partitionKey: {
+        name: "category",
+        type: aws_dynamodb.AttributeType.STRING,
+      },
+      sortKey: { name: "title", type: aws_dynamodb.AttributeType.STRING },
+      readCapacity: 5,
+      writeCapacity: 5,
+      projectionType: aws_dynamodb.ProjectionType.ALL,
+    });
+
+    dishTable.grantFullAccess(lambda);
+
+    const bookingTable = new aws_dynamodb.Table(
+      this,
+      `${props.stackName}-booking`,
+      {
+        tableName: `${props.stackName}-booking`,
+        partitionKey: { name: "id", type: aws_dynamodb.AttributeType.STRING },
+        readCapacity: 5,
+        writeCapacity: 5,
+      }
+    );
+
+    bookingTable.addGlobalSecondaryIndex({
+      indexName: "dateIndex",
+      partitionKey: { name: "date", type: aws_dynamodb.AttributeType.STRING },
+      sortKey: { name: "meal", type: aws_dynamodb.AttributeType.STRING },
+      readCapacity: 5,
+      writeCapacity: 5,
+      projectionType: aws_dynamodb.ProjectionType.ALL,
+    });
+
+    bookingTable.grantFullAccess(lambda);
 
     const api = new apigateway.RestApi(this, `${props.stackName}-graphql-api`, {
       restApiName: `${props.stackName}-graphql-api`,
@@ -76,7 +101,7 @@ export class ApplicationStack extends Stack {
       memorySize: props.lambdaRuntime.memorySize,
       logRetention: props.lambdaRuntime.logRetentionInDays,
       timeout: props.lambdaRuntime.timeout,
-      environment: { ...buildEnv() },
+      environment: { ...buildEnv(), NODE_OPTIONS: "--enable-source-maps" },
     } as StackProps);
   }
 }

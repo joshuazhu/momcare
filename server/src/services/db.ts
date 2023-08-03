@@ -1,16 +1,46 @@
 import {
-  DynamoDBClient,
+  DynamoDBDocumentClient,
+  PutCommand,
   ScanCommand,
-  GetItemCommand
-} from "@aws-sdk/client-dynamodb";
-import { unmarshall } from "@aws-sdk/util-dynamodb";
+  GetCommand,
+  BatchGetCommand,
+  BatchGetCommandInput
+} from "@aws-sdk/lib-dynamodb";
+import {
+  NativeScalarAttributeValue,
+} from "@aws-sdk/util-dynamodb";
 import * as Effect from "@effect/io/Effect";
 import * as Layer from "@effect/io/Layer";
 import { pipe } from "@effect/data/Function";
-import { QueryDBError, DynamoDB } from "../schema/interfaces/db";
+
+import { DynamoDB } from "./interfaces/db";
+import { QueryDBError } from "src/schema/errors";
+
+const putItem =
+  (self: DynamoDBDocumentClient): DynamoDB["putItem"] =>
+  (
+    tableName: string,
+    data: { [key: string]: NativeScalarAttributeValue | string[] }
+  ) =>
+    pipe(
+      Effect.tryPromise({
+        try: async () => {
+          const params = {
+            TableName: tableName,
+            Item: { ...data },
+          };
+
+          await self.send(new PutCommand(params));
+
+          return data
+        },
+        catch: (e) => new QueryDBError(tableName, (e as Error).message),
+      }),
+      Effect.tapError((e) => Effect.sync(() => console.log("Error", e)))
+    );
 
 const getAll =
-  (self: DynamoDBClient): DynamoDB["getAll"] =>
+  (self: DynamoDBDocumentClient): DynamoDB["getAll"] =>
   (tableName: string) =>
     pipe(
       Effect.tryPromise({
@@ -22,15 +52,15 @@ const getAll =
           const response = await self.send(command);
 
           if (!response.Items) return [];
-          return response.Items.map((i) => unmarshall(i));
+          return response.Items
         },
-        catch: (e) => new QueryDBError(tableName, e as Error),
+        catch: (e) => new QueryDBError(tableName, (e as Error).message),
       }),
       Effect.tapError((e) => Effect.sync(() => console.log("Error", e)))
     );
 
 const getByKey =
-  (self: DynamoDBClient): DynamoDB["getByKey"] =>
+  (self: DynamoDBDocumentClient): DynamoDB["getByKey"] =>
   (tableName: string, keyName: string, keyValue: string) =>
     pipe(
       Effect.tryPromise({
@@ -38,31 +68,61 @@ const getByKey =
           const params = {
             TableName: tableName,
             Key: {
-              [keyName]: { S: keyValue },
+              [keyName]: keyValue,
             },
           };
 
-          const command = new GetItemCommand(params);
+          const command = new GetCommand(params);
           const response = await self.send(command);
 
-          if (!response.Item) return;
-          return unmarshall(response.Item);
+          return response.Item
         },
         catch: (e) =>
           new QueryDBError(
             `Query table ${tableName} with ${keyName}=${keyValue}`,
-            e as Error
+            (e as Error).message
           ),
       }),
 
       Effect.tapError((e) => Effect.sync(() => console.log("Error", e)))
     );
 
-export const dynamodbLayer = (client: DynamoDBClient) =>
+  const getByKeys = 
+  (self: DynamoDBDocumentClient): DynamoDB["getByKeys"] =>
+  (tableName: string, keyName: string, keyValues: string[]) =>
+    pipe(
+      Effect.tryPromise({
+        try: async () => {
+            const params = {
+              RequestItems: {
+                [tableName]: {
+                  Keys: keyValues.map(value => ({ [keyName]: value}))
+                }
+              }
+            };
+
+          const command = new BatchGetCommand(params);
+          const response = await self.send(command);
+          
+          return response.Responses ? response.Responses[tableName] : []
+        },
+        catch: (e) =>
+          new QueryDBError(
+            `Query table ${tableName} with ${keyName} of ${keyValues}`,
+            (e as Error).message
+          ),
+      }),
+
+      Effect.tapError((e) => Effect.sync(() => console.log("Error", e)))
+    );
+
+export const dynamodbLayer = (client: DynamoDBDocumentClient) =>
   Layer.succeed(
     DynamoDB,
     DynamoDB.of({
       getAll: getAll(client),
       getByKey: getByKey(client),
+      putItem: putItem(client),
+      getByKeys: getByKeys(client)
     })
   );
