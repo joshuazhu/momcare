@@ -1,0 +1,6 @@
+query allBookings{
+  bookings {
+    id
+    totalIngredients
+  }
+}
