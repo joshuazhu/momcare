@@ -71,6 +71,9 @@ export class ApplicationStack extends Stack {
     const api = new apigateway.RestApi(this, `${props.stackName}-graphql-api`, {
       restApiName: `${props.stackName}-graphql-api`,
       description: `${props.stackName} graphql api`,
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS
+      }
     });
 
     const lambdaApiIntegration = new apigateway.LambdaIntegration(lambda);
