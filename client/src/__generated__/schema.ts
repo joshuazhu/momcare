@@ -91,15 +91,23 @@ export type UpdateDishInput = {
 export type AllBookingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllBookingsQuery = { __typename?: 'Query', bookings?: Array<{ __typename?: 'Booking', id?: string | null, totalIngredients?: Array<string | null> | null } | null> | null };
+export type AllBookingsQuery = { __typename?: 'Query', bookings?: Array<{ __typename?: 'Booking', id?: string | null, totalIngredients?: Array<string | null> | null, dishes?: Array<string | null> | null, meal?: string | null, date?: any | null } | null> | null };
+
+export type MealTypesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MealTypesQuery = { __typename?: 'Query', mealTypes?: Array<string | null> | null };
 
 
 export const AllBookingsDocument = gql`
     query allBookings {
-      bookings {
-        id
-        totalIngredients
-      }
+  bookings {
+    id
+    totalIngredients
+    dishes
+    meal
+    date
+  }
 }
     `;
 
@@ -129,3 +137,35 @@ export function useAllBookingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type AllBookingsQueryHookResult = ReturnType<typeof useAllBookingsQuery>;
 export type AllBookingsLazyQueryHookResult = ReturnType<typeof useAllBookingsLazyQuery>;
 export type AllBookingsQueryResult = Apollo.QueryResult<AllBookingsQuery, AllBookingsQueryVariables>;
+export const MealTypesDocument = gql`
+    query mealTypes {
+  mealTypes
+}
+    `;
+
+/**
+ * __useMealTypesQuery__
+ *
+ * To run a query within a React component, call `useMealTypesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMealTypesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMealTypesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMealTypesQuery(baseOptions?: Apollo.QueryHookOptions<MealTypesQuery, MealTypesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MealTypesQuery, MealTypesQueryVariables>(MealTypesDocument, options);
+      }
+export function useMealTypesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MealTypesQuery, MealTypesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MealTypesQuery, MealTypesQueryVariables>(MealTypesDocument, options);
+        }
+export type MealTypesQueryHookResult = ReturnType<typeof useMealTypesQuery>;
+export type MealTypesLazyQueryHookResult = ReturnType<typeof useMealTypesLazyQuery>;
+export type MealTypesQueryResult = Apollo.QueryResult<MealTypesQuery, MealTypesQueryVariables>;

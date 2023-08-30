@@ -2,5 +2,12 @@ query allBookings{
   bookings {
     id
     totalIngredients
+    dishes
+    meal
+    date
   }
+}
+
+query mealTypes {
+  mealTypes
 }
